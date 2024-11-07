@@ -1,0 +1,4 @@
+openai
+semantic_kernel
+instructor
+python-dotenv
