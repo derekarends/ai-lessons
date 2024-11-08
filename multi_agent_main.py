@@ -3,8 +3,12 @@ import os
 import dotenv
 
 from semantic_kernel.agents import AgentGroupChat, ChatCompletionAgent
-from semantic_kernel.agents.strategies.termination.termination_strategy import TerminationStrategy
-from semantic_kernel.connectors.ai.open_ai.services.azure_chat_completion import AzureChatCompletion
+from semantic_kernel.agents.strategies.termination.termination_strategy import (
+    TerminationStrategy,
+)
+from semantic_kernel.connectors.ai.open_ai.services.azure_chat_completion import (
+    AzureChatCompletion,
+)
 from semantic_kernel.contents.chat_message_content import ChatMessageContent
 from semantic_kernel.contents.utils.author_role import AuthorRole
 from semantic_kernel.kernel import Kernel
@@ -36,16 +40,14 @@ Don't waste time with chit chat.
 Consider suggestions when refining an idea.
 """
 
+
 def _create_kernel_with_chat_completion(service_id: str) -> Kernel:
-    kernel = Kernel(
-        services=[
-            AzureChatCompletion(
-              service_id=service_id,
-              deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
-              api_key=os.getenv("AZURE_OPENAI_API_KEY"),
-              endpoint=os.getenv("AZURE_OPENAI_ENDPOINT")
-          )
-        ],
+    kernel = Kernel()
+    kernel.add_service = AzureChatCompletion(
+        service_id=service_id,
+        deployment_name=os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME"),
+        api_key=os.getenv("AZURE_OPENAI_API_KEY"),
+        endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
     )
     return kernel
 
@@ -67,18 +69,23 @@ async def main():
 
     chat = AgentGroupChat(
         agents=[agent_writer, agent_reviewer],
-        termination_strategy=ApprovalTerminationStrategy(agents=[agent_reviewer], maximum_iterations=10),
+        termination_strategy=ApprovalTerminationStrategy(
+            agents=[agent_reviewer], maximum_iterations=10
+        ),
     )
 
-    input = "a slogan for a new line of electric cars."
+    # input = "a slogan for a new line of electric cars."
 
-    await chat.add_chat_message(ChatMessageContent(role=AuthorRole.USER, content=input))
-    print(f"# {AuthorRole.USER}: '{input}'")
+    while True:
+        user_input = input("You: ")
+        if user_input.lower() in ["exit", "quit"]:
+            break
+        await chat.add_chat_message(
+            ChatMessageContent(role=AuthorRole.USER, content=user_input)
+        )
 
-    async for content in chat.invoke():
-        print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
-
-    print(f"# IS COMPLETE: {chat.is_complete}")
+        async for content in chat.invoke():
+            print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
 
 
 if __name__ == "__main__":
