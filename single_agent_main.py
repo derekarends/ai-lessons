@@ -21,7 +21,7 @@ async def invoke_agent(agent: ChatCompletionAgent, input: str, chat: ChatHistory
     chat.add_user_message(input)
 
     async for content in agent.invoke(chat):
-        print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
+        print(f"{content.name or '*'}: '{content.content}'")
         chat.add_message(content)
 
 
