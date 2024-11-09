@@ -7,18 +7,14 @@ from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from semantic_kernel.connectors.ai.function_choice_behavior import (
     FunctionChoiceBehavior,
 )
-from semantic_kernel.connectors.ai.open_ai.prompt_execution_settings.azure_chat_prompt_execution_settings import (
-    AzureChatPromptExecutionSettings,
-)
 from semantic_kernel.contents.chat_history import ChatHistory
-from semantic_kernel.contents.utils.author_role import AuthorRole
 from semantic_kernel.kernel import Kernel
 
 from plugins.hours_plugin import HoursPlugin
 from plugins.menu_plugin import MenuPlugin
 
 NAME = "Jeeves"
-INSTRUCTIONS = "Use the plugins available answer the users question."
+INSTRUCTIONS = "Use the plugins available to answer the users question."
 
 
 async def invoke_agent(agent: ChatCompletionAgent, input: str, chat: ChatHistory):
@@ -40,9 +36,7 @@ async def main():
         )
     )
 
-    execution_settings = kernel.get_prompt_execution_settings_from_service_id(
-        service_id="agent"
-    )
+    execution_settings = kernel.get_prompt_execution_settings_from_service_id(service_id="agent")
     execution_settings.function_choice_behavior = FunctionChoiceBehavior.Auto()
 
     kernel.add_plugin(plugin=HoursPlugin(), plugin_name="hours")
